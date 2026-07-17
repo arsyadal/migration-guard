@@ -60,3 +60,39 @@ func TestAnalyzeSQL(t *testing.T) {
 		t.Error("Expected Warning check for CREATE TABLE without PRIMARY KEY")
 	}
 }
+
+func TestScanDirectory(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "migrations")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	files := []string{
+		"0001_init.up.sql",
+		"0001_init.down.sql",
+		"0002_add_users.up.sql",
+		"0003_add_logs.down.sql", // Missing up
+		"ignored_file.txt",
+	}
+	for _, f := range files {
+		if err := os.WriteFile(filepath.Join(tmpDir, f), []byte("SELECT 1;"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	pairs, err := ScanDirectory(tmpDir)
+	if err != nil {
+		t.Fatalf("ScanDirectory failed: %v", err)
+	}
+
+	if len(pairs) != 3 {
+		t.Fatalf("Expected 3 migration pairs/files, got %d", len(pairs))
+	}
+
+	// Verify order is sorted
+	if pairs[0].BaseName != "0001_init" {
+		t.Errorf("Expected 0001_init, got %s", pairs[0].BaseName)
+	}
+}
+
