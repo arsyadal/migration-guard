@@ -1,3 +1,3 @@
-module migration-guardrail
+module migration-guard
 
 go 1.20
