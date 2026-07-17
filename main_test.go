@@ -96,3 +96,54 @@ func TestScanDirectory(t *testing.T) {
 	}
 }
 
+func TestIntegrationCLI(t *testing.T) {
+	// Simple validation of down/rollback verification
+	tmpDir, err := os.MkdirTemp("", "migrations")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create up migration but no down migration (critical fail)
+	if err := os.WriteFile(filepath.Join(tmpDir, "0001_init.up.sql"), []byte("CREATE TABLE users (id INT PRIMARY KEY);"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	pairs, err := ScanDirectory(tmpDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var results []AuditResult
+	for _, pair := range pairs {
+		if pair.UpPath != "" {
+			res, err := AnalyzeSQL(pair.UpPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			results = append(results, res...)
+		}
+		// Verify rollback presence
+		if pair.DownPath == "" {
+			results = append(results, AuditResult{
+				File:      pair.BaseName + ".down.sql",
+				CheckItem: "Rollback Verification",
+				Status:    StatusCritical,
+				Details:   "Corresponding down migration file is missing or empty.",
+			})
+		}
+	}
+
+	var criticalCount int
+	for _, r := range results {
+		if r.Status == StatusCritical {
+			criticalCount++
+		}
+	}
+
+	if criticalCount != 1 {
+		t.Errorf("Expected 1 critical violation (missing rollback), got %d", criticalCount)
+	}
+}
+
+
