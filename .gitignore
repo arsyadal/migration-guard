@@ -1,0 +1,12 @@
+# Binaries
+perf-audit/perf-audit
+migration-guard/migration-guard
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test outputs
+*.test
+*.out

@@ -1,0 +1,16 @@
+{
+  "description": "perf-audit hooks for Claude Code / Codex. Copy the relevant entries into your Claude Code settings hooks section.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"$CLAUDE_TOOL_INPUT\" | grep -qE \"\\.go\\b\" && test -f go.mod && echo \"[perf-audit] .go file modified. Run perf-audit to check for memory regressions before committing.\" || true'"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,29 +1,15 @@
-# migration-guard
+# Backend Guardrails
 
-A database schema safety guardrail for AI agents. It scans SQL migration files, detects dangerous operations (e.g. `DROP` or `RENAME`), verifies rollback (`.down.sql`) files, and outputs a structured Markdown compliance report.
+A collection of developer guardrail utilities for backend systems.
 
-## Rules checked
+## Utilities
 
-* **Critical Hazards** (exits with code 1):
-  * `DROP TABLE` or `DROP COLUMN`
-  * `ALTER TABLE ... RENAME COLUMN`
-  * Missing or empty corresponding `.down.sql` file
-* **Warnings** (passes with warning):
-  * `ADD COLUMN` with `NOT NULL` but missing a `DEFAULT` value
-  * `CREATE TABLE` without defining a `PRIMARY KEY`
+### 1. [migration-guard](./migration-guard)
+A database schema safety guardrail written in Go. It scans SQL migration files, detects dangerous or inefficient SQL anti-patterns, checks for required primary keys/indexes, and verifies the presence of rollback (`.down.sql`) scripts.
 
-## Usage
+### 2. [perf-audit](./perf-audit)
+A performance benchmarking and comparative auditing tool for backend systems, allowing developers to monitor and review performance metrics.
 
-Run the checker in your migrations directory:
+---
 
-```bash
-go run . -dir ./db/migrations
-```
-
-### Options
-
-* `-dir`: Path to the directory containing migration files (default: `./migrations`).
-
-## License
-
-MIT
+For usage instructions of each tool, please refer to their respective directories.

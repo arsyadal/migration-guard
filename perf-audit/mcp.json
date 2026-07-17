@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "perf-audit": {
+      "command": "perf-audit",
+      "args": ["--mcp"]
+    }
+  }
+}
